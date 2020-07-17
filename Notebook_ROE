@@ -4,9 +4,9 @@ from quantopian.pipeline.data.morningstar import Fundamentals
 roe = Fundamentals.roe.latest
 roe_filter = roe.top(200)
 
-roe = Fundamentals.roe.latest
 def make_pipeline():
-
+    roe = Fundamentals.roe.latest
+    roe_filter = roe.top(200)
     return Pipeline(
         columns={
             'roe': roe

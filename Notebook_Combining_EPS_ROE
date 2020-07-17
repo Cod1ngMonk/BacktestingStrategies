@@ -1,0 +1,24 @@
+from quantopian.pipeline import Pipeline
+from quantopian.research import run_pipeline
+from quantopian.pipeline.data.morningstar import Fundamentals
+
+def make_pipeline():
+    eps = Fundamentals.diluted_eps_growth.latest
+    roe = Fundamentals.roe.latest
+    roe_filter = roe.rank(method = 'average')
+    eps_filter = eps.rank(method = 'average')
+    fundamental_filter = roe_filter + eps_filter
+
+    return Pipeline(
+        columns={
+            'eps': eps,
+            'roe' : roe
+        }, screen = fundamental_filter.top(200)
+    )
+
+result = run_pipeline(make_pipeline(), '2015-05-05', '2015-05-05')
+
+""Testing results
+result.head()
+len(result)
+"""

@@ -1,0 +1,30 @@
+from quantopian.pipeline import Pipeline
+from quantopian.research import run_pipeline
+from quantopian.pipeline.data.builtin import USEquityPricing
+from quantopian.pipeline.factors import SimpleMovingAverage
+
+def make_pipeline():
+    MA10 = SimpleMovingAverage(
+    inputs = [USEquityPricing.close],
+    window_length=10)
+    
+    MA30 = SimpleMovingAverage(
+    inputs = [USEquityPricing.close],
+    window_length=30)
+
+    MA_difference = MA10-MA30
+    is_tradable = MA_difference.top(200)
+    return Pipeline(
+        columns={
+            'MA10': MA10,
+            'MA30': MA30,
+            'MA_difference':MA_difference
+        }, screen = is_tradable
+    )
+ result = run_pipeline(make_pipeline(), '2015-05-05', '2015-05-05')
+
+    """Testing pipeline
+result.head()
+len(result)
+"""
+  

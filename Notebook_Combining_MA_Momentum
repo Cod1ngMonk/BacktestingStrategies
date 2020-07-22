@@ -1,0 +1,50 @@
+from quantopian.pipeline import Pipeline
+from quantopian.research import run_pipeline
+from quantopian.pipeline.data.builtin import USEquityPricing
+from quantopian.pipeline import CustomFactor, Pipeline
+import numpy
+from quantopian.pipeline.factors import SimpleMovingAverage
+
+class Momentum(CustomFactor):
+    # Default inputs
+    inputs = [USEquityPricing.close]
+
+    # Compute momentum
+    def compute(self, today, assets, out, close):
+        out[:] = close[-1] / close[0]
+def make_pipeline():
+    MA50 = SimpleMovingAverage(
+    inputs = [USEquityPricing.close],
+    window_length=50)
+    
+    MA100 = SimpleMovingAverage(
+    inputs = [USEquityPricing.close],
+    window_length=100)
+
+    MA_difference = (MA50-MA100)/MA50
+    MA_filter = MA_difference.top(200)
+    
+    ten_day_momentum = Momentum(window_length=10)
+    twenty_day_momentum = Momentum(window_length=20)
+
+    positive_momentum = ((ten_day_momentum.top(200)) & (twenty_day_momentum.top(200)))
+
+    is_tradable = MA_filter & positive_momentum
+    
+
+    
+    return Pipeline(
+        columns={
+            'ten_day_momentum': ten_day_momentum,
+            'twenty_day_momentum': twenty_day_momentum,
+            'MA_difference':MA_difference            
+            
+        },
+        screen=is_tradable
+    )
+result = run_pipeline(make_pipeline(), '2015-05-05', '2016-05-05')
+
+"""Testing pipeline
+result.head()
+len(result)
+"""
